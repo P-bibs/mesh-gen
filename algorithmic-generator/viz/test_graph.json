@@ -1,0 +1,14 @@
+{
+  "node": { "girth": 1, "position": [0, 0, 0] },
+  "children": [
+    {
+      "node": { "girth": 1, "position": [0, 0, 0.5] },
+      "children": [
+        { "node": { "girth": 1, "position": [0.5, 0, 0.75] }, "children": [] },
+        { "node": { "girth": 1, "position": [0, 0.5, 0.75] }, "children": [] },
+        { "node": { "girth": 1, "position": [-0.5, 0, 0.75] }, "children": [] },
+        { "node": { "girth": 1, "position": [0, -0.5, 0.75] }, "children": [] }
+      ]
+    }
+  ]
+}

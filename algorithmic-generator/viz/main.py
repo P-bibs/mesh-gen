@@ -1,4 +1,5 @@
-import random
+import json
+import sys
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,22 +21,7 @@ def get_maximum_edges(graph):
         
     return count
 
-def generate_random_3Dgraph(n_nodes, radius, seed=None):
-
-    graph =  {"x": 0, "y": 0, "z": 0, "children": [
-            {"x": 0, "y": 0, "z": 0.5, "children": [
-                {"x": 0.5, "y": 0, "z": 0.75, "children": []},
-                {"x": 0, "y": 0.5, "z": 0.75, "children": []},
-                {"x": -0.5, "y": 0, "z": 0.75, "children": []},
-                {"x": 0, "y": -0.5, "z": 0.75, "children": []}
-        ]},
-    ]}
-
-    return graph
-
-def network_plot_3D(graph, angle, save=False):
-
-    
+def network_plot_3D(graph):
     # Get number of nodes
     n = get_number_of_nodes(graph)
 
@@ -48,57 +34,50 @@ def network_plot_3D(graph, angle, save=False):
     # 3D network plot
     with plt.style.context(('ggplot')):
         
-        fig = plt.figure(figsize=(10,7))
-        ax = Axes3D(fig)
+        fig = plt.figure()
+        ax = plt.axes(projection='3d')
         
         # Loop on the pos dictionary to extract the x,y,z coordinates of each node
         nodes = [graph]
         while len(nodes) != 0:
             node = nodes.pop()
-            for child in node["children"]:
+
+            children = node["children"]
+            node = node["node"]
+
+            girth = node["girth"]
+            position = node["position"]
+
+            for child in children:
                 nodes.append(child)
             
-            xi = node["x"]
-            yi = node["y"]
-            zi = node["z"]
+            xi = position[0]
+            yi = position[1]
+            zi = position[2]
 
             # Scatter plot
-            ax.scatter(xi, yi, zi, c=plt.cm.plasma(0.5), edgecolors='k', alpha=0.7)
+            ax.scatter3D(xi, yi, zi, alpha=0.7)
 
             # Loop on the list of edges to get the x,y,z, coordinates of the connected nodes
             # Those two points are the extrema of the line to be plotted
-            for child in node["children"]:
-                x = np.array((xi, child["x"]))
-                y = np.array((yi, child["y"]))
-                z = np.array((zi, child["z"]))
+            for child in children:
+                x = np.array((xi, child["node"]["position"][0]))
+                y = np.array((yi, child["node"]["position"][1]))
+                z = np.array((zi, child["node"]["position"][2]))
             
                 # Plot the connecting lines
-                ax.plot(x, y, z, c='black', alpha=0.5)
+                ax.plot3D(x, y, z, c='black', alpha=0.5)
     
-    # Set the initial view
-    ax.view_init(30, angle)
-
-    # Hide the axes
-    ax.set_axis_off()
-
-    if save is not False:
-        plt.savefig("./data"+str(angle).zfill(3)+".png")
-        plt.close('all')
-    else:
-        plt.show()
+    plt.show()
     
     return
 
-n=200
-G = generate_random_3Dgraph(n_nodes=n, radius=0.25, seed=1)
-network_plot_3D(G,0, save=False)
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: main.py <json file>")
+        sys.exit(1)
 
-for k in range(20,201,1):
+    with open(sys.argv[1]) as f:
+        graph = json.load(f)
 
-   G = generate_random_3Dgraph(n_nodes=k, radius=0.25, seed=1)
-
-   angle = (k-20)*360/(200-20)
-    
-   network_plot_3D(G,angle, save=True)
-
-   print(angle)
+    network_plot_3D(graph)
